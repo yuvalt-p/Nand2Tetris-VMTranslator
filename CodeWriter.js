@@ -10,51 +10,54 @@ export default class CodeWriter {
   #printCurrentCommand(commandName) {
     this.outputFile.write(`//${commandName} command\n`);
   }
-  #setA_RegisterToSP_Value() {
-    this.outputFile.write("@sp\n");
+  #setSPMinusOne() {
+    this.outputFile.write("@SP\n");
+    this.outputFile.write("M=M-1\n");
+  }
+  #setAToCurrentMValue() {
     this.outputFile.write("A=M\n");
   }
-  #setStackPointerAndM_RegisterMinusOne() {
-    this.outputFile.write("@sp\n");
-    this.outputFile.write("AM=M-1\n");
-  }
   #setAToStackPointerMinusOne() {
-    this.outputFile.write("@sp\n");
+    this.outputFile.write("@SP\n");
     this.outputFile.write("A=M-1\n");
   }
-  #decreaseStackPointerValueByOne() {
-    this.outputFile.write("@sp\n");
-    this.outputFile.write("M=M-1\n");
+  #setAddress(segmant, index) {
+    this.outputFile.write(`@${index}\n`);
+    this.outputFile.write(`D=A\n`);
+    this.outputFile.write(`@${segmant}\n`);
+    this.outputFile.write(`D=D+M\n`);
+    this.outputFile.write(`@addr\n`);
+    this.outputFile.write(`M=D\n`);
   }
   writeArithmetic(command) {
     this.#printCurrentCommand(command);
     switch (command) {
       case "add": {
-        this.#setAToStackPointerMinusOne();
+        this.#setSPMinusOne();
+        this.#setAToCurrentMValue();
         this.outputFile.write("D=M\n");
         this.outputFile.write("A=A-1\n");
         this.outputFile.write("M=M+D\n");
-        this.#decreaseStackPointerValueByOne();
         break;
       }
       case "sub": {
-        this.#setAToStackPointerMinusOne();
+        this.#setSPMinusOne();
+        this.#setAToCurrentMValue();
         this.outputFile.write("D=M\n");
         this.outputFile.write("A=A-1\n");
         this.outputFile.write("M=M-D\n");
-        this.#decreaseStackPointerValueByOne();
         break;
       }
       case "neg": {
         this.#setAToStackPointerMinusOne();
         this.outputFile.write("M=-M\n");
-        this.#decreaseStackPointerValueByOne();
         break;
       }
       case "eq": {
-        this.#setAToStackPointerMinusOne();
+        this.#setSPMinusOne();
+        this.#setAToCurrentMValue();
         this.outputFile.write("D=M\n");
-        this.#setStackPointerAndM_RegisterMinusOne();
+        this.outputFile.write("A=A-1\n");
         this.outputFile.write("D=M-D\n");
         this.outputFile.write(`@equal_true_${this.equalCheckCounter}\n`);
         this.outputFile.write("D;JEQ\n");
@@ -70,9 +73,10 @@ export default class CodeWriter {
         break;
       }
       case "gt": {
-        this.#setAToStackPointerMinusOne();
+        this.#setSPMinusOne();
+        this.#setAToCurrentMValue();
         this.outputFile.write("D=M\n");
-        this.#setStackPointerAndM_RegisterMinusOne();
+        this.outputFile.write("A=A-1\n");
         this.outputFile.write("D=M-D\n");
         this.outputFile.write(`@gt_true_${this.gtCheckCounter}\n`);
         this.outputFile.write("D;JGT\n");
@@ -88,9 +92,10 @@ export default class CodeWriter {
         break;
       }
       case "lt": {
-        this.#setAToStackPointerMinusOne();
+        this.#setSPMinusOne();
+        this.#setAToCurrentMValue();
         this.outputFile.write("D=M\n");
-        this.#setStackPointerAndM_RegisterMinusOne();
+        this.outputFile.write("A=A-1\n");
         this.outputFile.write("D=M-D\n");
         this.outputFile.write(`@lt_true_${this.ltCheckCounter}\n`);
         this.outputFile.write("D;JLT\n");
@@ -106,18 +111,19 @@ export default class CodeWriter {
         break;
       }
       case "and": {
-        this.#setAToStackPointerMinusOne();
+        this.#setSPMinusOne();
+        this.#setAToCurrentMValue();
         this.outputFile.write("D=M\n");
         this.outputFile.write("A=A-1\n");
         this.outputFile.write("M=M&D\n");
         break;
       }
       case "or": {
-        this.#setAToStackPointerMinusOne();
+        this.#setSPMinusOne();
+        this.#setAToCurrentMValue();
         this.outputFile.write("D=M\n");
         this.outputFile.write("A=A-1\n");
         this.outputFile.write("M=M|D\n");
-        this.#decreaseStackPointerValueByOne();
         break;
       }
       case "not": {
@@ -127,7 +133,31 @@ export default class CodeWriter {
       }
     }
   }
-  writePushPop(command, segmant, index) {}
+  writePushPop(command, segmant, index) {
+    this.#setAddress(segmant, index);
+    switch (command) {
+      case "C_PUSH": {
+        this.outputFile.write(`A=M\n`);
+        this.outputFile.write(`D=M\n`);
+        this.outputFile.write(`@SP\n`);
+        this.outputFile.write(`A=M\n`);
+        this.outputFile.write(`M=D\n`);
+        this.outputFile.write(`@SP\n`);
+        this.outputFile.write(`M=M+1\n`);
+        break;
+      }
+      case "C_POP": {
+        this.outputFile.write(`@SP\n`);
+        this.outputFile.write(`M=M-1\n`);
+        this.outputFile.write(`A=M\n`);
+        this.outputFile.write(`D=M\n`);
+        this.outputFile.write(`@addr\n`);
+        this.outputFile.write(`A=M\n`);
+        this.outputFile.write(`M=D\n`);
+        break;
+      }
+    }
+  }
   close() {
     this.outputFile.close();
   }
