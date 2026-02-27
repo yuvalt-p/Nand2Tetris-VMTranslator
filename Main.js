@@ -23,14 +23,12 @@ export default class VMTranslator {
             memoryIndex,
           );
         }
-      } else {
-        this.codeWriter.close();
-        console.log(
-          `no more commands. file has been created at ${this.codeWriter.outputFile.path}`,
-        );
-        return;
       }
     }
+    this.codeWriter.close();
+    console.log(
+      `no more commands. file has been created at ${this.codeWriter.outputFile.path}`,
+    );
   }
 }
 

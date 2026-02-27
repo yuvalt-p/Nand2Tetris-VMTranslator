@@ -134,6 +134,7 @@ export default class CodeWriter {
     }
   }
   writePushPop(command, segmant, index) {
+    this.#printCurrentCommand(command);
     const isConstantSegment = segmant === "constant";
     if (!isConstantSegment) {
       this.#setAddress(segmant, index);
