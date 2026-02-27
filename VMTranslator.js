@@ -33,7 +33,7 @@ export default class VMTranslator {
 }
 
 const inputPath = process.argv[2];
-const outputPath = process.argv[3];
+const outputPath = inputPath.replace(".vm", ".asm");
 
 const translator = new VMTranslator(inputPath, outputPath);
 translator.parseEachCommandIntoAssembly();

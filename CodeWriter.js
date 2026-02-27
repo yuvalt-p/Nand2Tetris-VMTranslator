@@ -21,11 +21,28 @@ export default class CodeWriter {
     this.outputFile.write("@SP\n");
     this.outputFile.write("A=M-1\n");
   }
+  #segmentSymbol(segmant) {
+    const map = {
+      local: "LCL",
+      argument: "ARG",
+      this: "THIS",
+      that: "THAT",
+    };
+    return map[segmant];
+  }
   #setAddress(segmant, index) {
-    this.outputFile.write(`@${index}\n`);
-    this.outputFile.write(`D=A\n`);
-    this.outputFile.write(`@${segmant}\n`);
-    this.outputFile.write(`D=D+M\n`);
+    if (segmant === "temp") {
+      this.outputFile.write(`@${5 + index}\n`);
+      this.outputFile.write(`D=A\n`);
+    } else if (segmant === "pointer") {
+      this.outputFile.write(`@${3 + index}\n`);
+      this.outputFile.write(`D=A\n`);
+    } else {
+      this.outputFile.write(`@${index}\n`);
+      this.outputFile.write(`D=A\n`);
+      this.outputFile.write(`@${this.#segmentSymbol(segmant)}\n`);
+      this.outputFile.write(`D=D+M\n`);
+    }
     this.outputFile.write(`@addr\n`);
     this.outputFile.write(`M=D\n`);
   }
