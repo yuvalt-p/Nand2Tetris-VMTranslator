@@ -134,11 +134,19 @@ export default class CodeWriter {
     }
   }
   writePushPop(command, segmant, index) {
-    this.#setAddress(segmant, index);
+    const isConstantSegment = segmant === "constant";
+    if (!isConstantSegment) {
+      this.#setAddress(segmant, index);
+    }
     switch (command) {
       case "C_PUSH": {
-        this.outputFile.write(`A=M\n`);
-        this.outputFile.write(`D=M\n`);
+        if (isConstantSegment) {
+          this.outputFile.write(`@${index}\n`);
+          this.outputFile.write(`D=A\n`);
+        } else {
+          this.outputFile.write(`A=M\n`);
+          this.outputFile.write(`D=M\n`);
+        }
         this.outputFile.write(`@SP\n`);
         this.outputFile.write(`A=M\n`);
         this.outputFile.write(`M=D\n`);
