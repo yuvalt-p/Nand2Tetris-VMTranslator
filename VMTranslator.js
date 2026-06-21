@@ -1,19 +1,22 @@
 import Parser from "./Parser.js";
 import CodeWriter from "./CodeWriter.js";
+import fs from "fs";
+import path from "path";
 
 export default class VMTranslator {
   constructor(inputPath, outputPath) {
-    this.parsedFileObject = new Parser(inputPath);
+    this.inputPath = inputPath;
     this.codeWriter = new CodeWriter(outputPath);
   }
 
-  parseEachCommandIntoAssembly() {
-    for (let commandLine of this.parsedFileObject.fileAsStringArray) {
-      if (this.parsedFileObject.hasMoreCommands()) {
-        this.parsedFileObject.advance();
-        let commandType = this.parsedFileObject.commandType();
-        let commandOrSegment = this.parsedFileObject.arg1();
-        let memoryIndex = this.parsedFileObject.arg2();
+  #processFile(filePath) {
+    const parser = new Parser(filePath);
+    for (let commandLine of parser.fileAsStringArray) {
+      if (parser.hasMoreCommands()) {
+        parser.advance();
+        let commandType = parser.commandType();
+        let commandOrSegment = parser.arg1();
+        let memoryIndex = parser.arg2();
         if (commandType === "C_ARITHMETIC") {
           this.codeWriter.writeArithmetic(commandOrSegment);
         } else if (commandType === "C_POP" || commandType === "C_PUSH") {
@@ -25,6 +28,21 @@ export default class VMTranslator {
         }
       }
     }
+  }
+
+  parseEachCommandIntoAssembly() {
+    const stat = fs.statSync(this.inputPath);
+    if (stat.isDirectory()) {
+      const vmFiles = fs
+        .readdirSync(this.inputPath)
+        .filter((f) => f.endsWith(".vm"))
+        .map((f) => path.join(this.inputPath, f));
+      for (const filePath of vmFiles) {
+        this.#processFile(filePath);
+      }
+    } else {
+      this.#processFile(this.inputPath);
+    }
     this.codeWriter.close();
     console.log(
       `no more commands. file has been created at ${this.codeWriter.outputFile.path}`,
@@ -33,7 +51,14 @@ export default class VMTranslator {
 }
 
 const inputPath = process.argv[2];
-const outputPath = inputPath.replace(".vm", ".asm");
+const stat = fs.statSync(inputPath);
+let outputPath;
+if (stat.isDirectory()) {
+  const dirName = path.basename(inputPath);
+  outputPath = path.join(inputPath, `${dirName}.asm`);
+} else {
+  outputPath = inputPath.replace(".vm", ".asm");
+}
 
 const translator = new VMTranslator(inputPath, outputPath);
 translator.parseEachCommandIntoAssembly();
