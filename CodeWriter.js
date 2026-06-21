@@ -6,6 +6,7 @@ export default class CodeWriter {
     this.equalCheckCounter = 0;
     this.gtCheckCounter = 0;
     this.ltCheckCounter = 0;
+    this.fileName = "";
   }
   #printCurrentCommand(commandName) {
     this.outputFile.write(`//${commandName} command\n`);
@@ -46,6 +47,17 @@ export default class CodeWriter {
     this.outputFile.write(`@addr\n`);
     this.outputFile.write(`M=D\n`);
   }
+  setFileName(fileName){
+    this.outputFile.write(`//starting to translate ${fileName} file:`);
+    this.fileName = fileName;
+  }
+  writeInit(){
+    this.outputFile.write(`@256\n`);
+    this.outputFile.write(`D=A\n`);
+    this.outputFile.write(`@SP\n`);
+    this.outputFile.write(`M=D\n`);
+    this.writeCall("Sys.init", 0);
+  } 
   writeArithmetic(command) {
     this.#printCurrentCommand(command);
     switch (command) {
@@ -183,6 +195,24 @@ export default class CodeWriter {
         break;
       }
     }
+  }
+  writeLabel(label){
+
+  }
+  writeGoTo(label) {
+
+  }
+  writeIf(label) {
+
+  }
+  writeFunction(functionName, numVars){
+
+  }
+  writeCall(functionName, numArgs){
+
+  }
+  writeReturn(){
+
   }
   close() {
     this.outputFile.close();

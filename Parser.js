@@ -44,10 +44,26 @@ export default class Parser {
       "or",
       "not",
     ];
-
-    if (arithmeticCommands.includes(command)) return "C_ARITHMETIC";
-    if (command === "push") return "C_PUSH";
-    if (command === "pop") return "C_POP";
+    switch (true) {
+      case arithmeticCommands.includes(command):
+        return "C_ARITHMETIC";
+      case command === "push":
+       return "C_PUSH";
+      case command === "pop":
+       return "C_POP";
+      case command === "goto":
+       return "C_GOTO";
+      case command === "if-goto":
+        return "C_IF_GOTO"
+      case command === "label":
+        return "C_LABEL";
+      case command === "call":
+        return "C_CALL";
+      case command === "function":
+        return "C_FUNCTION";
+      case command === "return":
+        return "C_RETURN";
+    } 
   }
   arg1() {
     if (!this.currentCommand) {

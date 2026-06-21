@@ -11,6 +11,7 @@ export default class VMTranslator {
 
   #processFile(filePath) {
     const parser = new Parser(filePath);
+    this.codeWriter.setFileName(path.basename(filePath, ".vm"));
     for (let commandLine of parser.fileAsStringArray) {
       if (parser.hasMoreCommands()) {
         parser.advance();
@@ -32,6 +33,7 @@ export default class VMTranslator {
 
   parseEachCommandIntoAssembly() {
     const stat = fs.statSync(this.inputPath);
+    this.codeWriter.writeInit();
     if (stat.isDirectory()) {
       const vmFiles = fs
         .readdirSync(this.inputPath)
