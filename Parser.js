@@ -10,8 +10,8 @@ export default class Parser {
     const fileAsStringArray = fs
       .readFileSync(this.rawFile, "utf-8")
       .split("\n")
-      .filter((row) => !row.includes("/") && row.trim() !== "")
-      .map((row) => row.trim());
+      .map((row) => row.split("//")[0].trim())
+      .filter((row) => row !== "");
     return fileAsStringArray;
   }
   hasMoreCommands() {

@@ -332,6 +332,6 @@ export default class CodeWriter {
     this.outputFile.write(`0;JMP\n`);
   }
   close() {
-    this.outputFile.close();
+    this.outputFile.end();
   }
 }

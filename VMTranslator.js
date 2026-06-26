@@ -55,8 +55,9 @@ export default class VMTranslator {
 
   parseEachCommandIntoAssembly() {
     const stat = fs.statSync(this.inputPath);
-    this.codeWriter.writeInit();
     if (stat.isDirectory()) {
+      this.codeWriter.writeInit();
+
       const vmFiles = fs
         .readdirSync(this.inputPath)
         .filter((f) => f.endsWith(".vm"))
