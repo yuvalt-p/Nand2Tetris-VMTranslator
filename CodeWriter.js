@@ -50,7 +50,7 @@ export default class CodeWriter {
     this.outputFile.write(`M=D\n`);
   }
   setFileName(fileName){
-    this.outputFile.write(`//starting to translate ${fileName} file:`);
+    this.outputFile.write(`//starting to translate ${fileName} file:\n`);
     this.fileName = fileName;
   }
   writeInit(){
