@@ -167,7 +167,8 @@ export default class CodeWriter {
   writePushPop(command, segmant, index) {
     this.#printCurrentCommand(command);
     const isConstantSegment = segmant === "constant";
-    if (!isConstantSegment) {
+    const isStaticSegment = segmant === "static";
+    if (!isConstantSegment && !isStaticSegment) {
       this.#setAddress(segmant, index);
     }
     switch (command) {
@@ -175,6 +176,9 @@ export default class CodeWriter {
         if (isConstantSegment) {
           this.outputFile.write(`@${index}\n`);
           this.outputFile.write(`D=A\n`);
+        } else if (isStaticSegment) {
+          this.outputFile.write(`@${this.fileName}.${index}\n`);
+          this.outputFile.write(`D=M\n`);
         } else {
           this.outputFile.write(`A=M\n`);
           this.outputFile.write(`D=M\n`);
@@ -187,7 +191,16 @@ export default class CodeWriter {
         break;
       }
       case "C_POP": {
-        this.#manualPop("addr");
+        if (isStaticSegment) {
+          this.outputFile.write(`@SP\n`);
+          this.outputFile.write(`M=M-1\n`);
+          this.outputFile.write(`A=M\n`);
+          this.outputFile.write(`D=M\n`);
+          this.outputFile.write(`@${this.fileName}.${index}\n`);
+          this.outputFile.write(`M=D\n`);
+        } else {
+          this.#manualPop("addr");
+        }
         break;
       }
     }
