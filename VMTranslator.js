@@ -16,16 +16,38 @@ export default class VMTranslator {
       if (parser.hasMoreCommands()) {
         parser.advance();
         let commandType = parser.commandType();
-        let commandOrSegment = parser.arg1();
-        let memoryIndex = parser.arg2();
-        if (commandType === "C_ARITHMETIC") {
-          this.codeWriter.writeArithmetic(commandOrSegment);
-        } else if (commandType === "C_POP" || commandType === "C_PUSH") {
-          this.codeWriter.writePushPop(
-            commandType,
-            commandOrSegment,
-            memoryIndex,
-          );
+        let arg1 = parser.arg1();
+        let arg2 = parser.arg2();
+        switch (commandType) {
+          case ("C_ARITHMETIC") : 
+          this.codeWriter.writeArithmetic(arg1);
+            break;
+          case ("C_POP"):
+          case ("C_PUSH"):
+            this.codeWriter.writePushPop(
+              commandType,
+              arg1,
+              arg2,
+            );
+            break; 
+          case ("C_GOTO"):
+            this.codeWriter.writeGoTo(arg1);
+            break;
+          case ("C_IF_GOTO"):
+            this.codeWriter.writeIf(arg1);
+            break;
+          case ("C_LABEL"):
+            this.codeWriter.writeLabel(arg1);
+            break;
+          case ("C_CALL"):
+            this.codeWriter.writeCall(arg1, arg2)
+            break;
+          case ("C_FUNCTION"):
+            this.codeWriter.writeFunction(arg1, arg2);
+            break;
+          case ("C_RETURN"):
+            this.codeWriter.writeReturn();
+            break;
         }
       }
     }
